@@ -11,6 +11,26 @@ var SpotifyWebApi = (function () {
 
   var WrapPromiseWithAbort = function (promise, onAbort) {
     promise.abort = onAbort;
+
+    var originalThen = promise.then;
+    var originalCatch = promise.catch;
+    var originalFinally = promise.finally;
+
+    promise.then = function() {
+      var newPromise = originalThen.apply(promise, arguments);
+      return WrapPromiseWithAbort(newPromise, onAbort);
+    };
+
+    promise.catch = function() {
+      var newPromise = originalCatch.apply(promise, arguments);
+      return WrapPromiseWithAbort(newPromise, onAbort);
+    };
+
+    promise.finally = function() {
+      var newPromise = originalFinally.apply(promise, arguments);
+      return WrapPromiseWithAbort(newPromise, onAbort);
+    };
+
     return promise;
   };
 
